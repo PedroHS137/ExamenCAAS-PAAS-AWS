@@ -14,48 +14,67 @@ const toneAnalyzer = new ToneAnalyzerV3({
     serviceUrl:  process.env.URL,
 });
 
-
 const app = express()
 
 app.use(express.static(__dirname + '/html'))
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+let url = "https://examenpjhs.mybluemix.net/";
 
-function getUserTxt(){
-    let txt = document.getElementById("entrada").value;  
-    return txt;
+async function getResponse() {
+    let options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            texto: form.texto.value
+        })
+    };
+    response = await fetch(url, options);
+    data = await response.json();
+    if (data.status == 200) {
+        result = data.result;
+        var respuesta = `<p>${JSON.stringify(result.document_tone)}​​​​​​​​​​​​</p> 
+        <p>${JSON.stringify(result.sentences_tone)}​​​​​​​​​​​​</p>`;
+        document.querySelector('#respuesta').innerHTML = respuesta;
+    }
 }
-
-app.get('/autor', (req, res) => {
-    res.statusCode = 200;
-    res.send({ "alumno": "PedroHS" , "servicio":"ECS en AWS"})
-    //res.sendFile(path.join(__dirname, 'html', 'index.html'))
-})
-
 app.post('/', (req, res) => {
-    let text = req.body;
-    console.log(text);
-//     const text = 'Team, I know that times are tough! Product '
-//   + 'sales have been disappointing for the past three '
-//   + 'quarters. We have a competitive product, but we '
-//   + 'need to do a better job of selling it!';
+    
+    const texto = req.body.text;
+    console.log(texto+'dostres')
     const toneParams = {
-        toneInput: { 'text': text },
+        toneInput: { 'text': texto },
         contentType: 'application/json',
     };
     //console.log(req.body.text)
-    res.send(toneAnalyzer.tone(toneParams)
+    toneAnalyzer.tone(toneParams)
         .then(toneAnalysis => {
-            console.log(JSON.stringify(toneAnalysis, null, 2));
+            JSON.stringify(toneAnalysis, null, 2);
+            res.send({ "respuesta": toneAnalysis.result })
         })
         .catch(err => {
             console.log('error:', err);
-        }));
-    //res.send({ "respuesta": total })
+        });
+    
 })
+    // function getUserTxt(){
+    //     var txt = document.getElementById("entrada").value;
+    //     console.log(txt);
+    //     //document.getElementById("entrada").innerHTML = txt;  
+
+    // }
+   
+
+    app.get('/autor', (req, res) => {
+        res.statusCode = 200;
+        res.send({ "alumno": "PedroHS", "servicio": "ECS en AWS" })
+        //res.sendFile(path.join(__dirname, 'html', 'index.html'))
+    })
 
 
-app.listen(3000, function () {
-    console.log('app is running in http://localhost:3000')
-})
+    app.listen(8080, function () {
+        console.log('app is running in http://localhost:8080')
+    })

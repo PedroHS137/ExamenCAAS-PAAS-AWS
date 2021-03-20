@@ -1,5 +1,5 @@
 # creamos una variable
-ARG PORT=3000
+ARG PORT=8080
 # traemos la imagen de node 12 con kernel de alpine
 FROM node:12-alpine
 # label para agregar metadatos
